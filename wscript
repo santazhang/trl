@@ -16,6 +16,11 @@ def configure(conf):
     conf.env.LIB_MEMDB = 'memdb'
     conf.env.USES += " MEMDB"
 
+    conf.env.INCLUDES_RLOG = os.path.join(os.getcwd(), "../simple-rpc")
+    conf.env.LIBPATH_RLOG = os.path.join(os.getcwd(), "../simple-rpc/build")
+    conf.env.LIB_RLOG = 'rlog'
+    conf.env.USES += " RLOG"
+
     conf.env.INCLUDES_RPC = os.path.join(os.getcwd(), "../simple-rpc")
     conf.env.LIBPATH_RPC = os.path.join(os.getcwd(), "../simple-rpc/build")
     conf.env.LIB_RPC = 'simplerpc'
@@ -41,6 +46,7 @@ def build(bld):
         bld.program(source=source, target=target, includes=". trl", use="trl %s" % bld.env.USES)
 
     _prog("trl/server_main.cc", "trl_server")
+    _prog("trl/client_main.cc", "trl_client")
     _prog(bld.path.ant_glob("test/test*.cc"), "unittest")
 
 #
