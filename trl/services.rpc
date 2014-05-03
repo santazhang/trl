@@ -1,7 +1,11 @@
 namespace trl;
 
 abstract service TRL {
+    fast begin_transaction(i64 txn_id);
     fast update_account(i64 txn_id, i32 account_id, i32 amount);
+    fast commit_prepare(i64 txn_id | i8 ok);
+    fast commit_confirm(i64 txn_id);
+    fast abort_transaction(i64 txn_id);
 };
 
 %%

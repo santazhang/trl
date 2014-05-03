@@ -62,6 +62,8 @@ static void load_config() {
     if (conf_records_per_transaction != old) {
         Log::info("set records_per_transaction = %d", conf_records_per_transaction);
     }
+    
+    verify(conf_active_servers * conf_records_per_server <= max_record_id);
 }
 
 ClientPool* client_pool;
