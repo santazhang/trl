@@ -30,8 +30,10 @@ def configure(conf):
     conf.env.USES += " PTHREAD"
 
 def build(bld):
+    _depend("trl/services.h", "trl/services.rpc", "../simple-rpc/bin/rpcgen trl/services.rpc")
+
     bld.stlib(
-        source=bld.path.ant_glob(["trl/*.cc", "trl/*.cpp"], excl="trl/server_main.cc"),
+        source=bld.path.ant_glob(["trl/*.cc", "trl/*.cpp", "trl/*.c"], excl="trl/server_main.cc"),
         target="trl",
         use=bld.env.USES)
 

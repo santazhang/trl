@@ -1,0 +1,13 @@
+namespace trl;
+
+abstract service TRL {
+    fast update_account(i64 txn_id, i32 account_id, i32 amount);
+};
+
+%%
+
+namespace trl {
+
+TRLService* create_trl_service();
+
+} // namespace trl
