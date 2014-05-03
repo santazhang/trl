@@ -1,4 +1,4 @@
-APPNAME="skeleton"
+APPNAME="transaction-rate-limit"
 VERSION="0.1"
 
 def options(opt):
@@ -11,15 +11,15 @@ def configure(conf):
     _extra_warnings(conf)
     conf.env.USES = ""
 
-    # conf.env.INCLUDES_MEMDB = os.path.join(os.getcwd(), "../memdb")
-    # conf.env.LIBPATH_MEMDB = os.path.join(os.getcwd(), "../memdb/build")
-    # conf.env.LIB_MEMDB = 'memdb'
-    # conf.env.USES += " MEMDB"
+    conf.env.INCLUDES_MEMDB = os.path.join(os.getcwd(), "../memdb")
+    conf.env.LIBPATH_MEMDB = os.path.join(os.getcwd(), "../memdb/build")
+    conf.env.LIB_MEMDB = 'memdb'
+    conf.env.USES += " MEMDB"
 
-    # conf.env.INCLUDES_RPC = os.path.join(os.getcwd(), "../simple-rpc")
-    # conf.env.LIBPATH_RPC = os.path.join(os.getcwd(), "../simple-rpc/build")
-    # conf.env.LIB_RPC = 'simplerpc'
-    # conf.env.USES += " RPC"
+    conf.env.INCLUDES_RPC = os.path.join(os.getcwd(), "../simple-rpc")
+    conf.env.LIBPATH_RPC = os.path.join(os.getcwd(), "../simple-rpc/build")
+    conf.env.LIB_RPC = 'simplerpc'
+    conf.env.USES += " RPC"
 
     conf.env.INCLUDES_BASE = os.path.join(os.getcwd(), "../base-utils")
     conf.env.LIBPATH_BASE = os.path.join(os.getcwd(), "../base-utils/build")
@@ -31,14 +31,14 @@ def configure(conf):
 
 def build(bld):
     bld.stlib(
-        source=bld.path.ant_glob(["skel/*.cc", "skel/*.cpp"], excl="skel/main.cc"),
-        target="skel",
+        source=bld.path.ant_glob(["trl/*.cc", "trl/*.cpp"], excl="trl/server_main.cc"),
+        target="trl",
         use=bld.env.USES)
 
     def _prog(source, target):
-        bld.program(source=source, target=target, includes=". skel", use="skel %s" % bld.env.USES)
+        bld.program(source=source, target=target, includes=". trl", use="trl %s" % bld.env.USES)
 
-    _prog("skel/main.cc", "skel_app")
+    _prog("trl/server_main.cc", "trl_server")
     _prog(bld.path.ant_glob("test/test*.cc"), "unittest")
 
 #
