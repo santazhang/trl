@@ -142,8 +142,9 @@ int main() {
 
         if (timer.elapsed() > interval) {
             load_config();
-            RLog::info("abort_count = %d", abort_count);
-            RLog::info("commit_count = %d", commit_count);
+            RLog::info("commit_count = %d, abort_count = %d", commit_count, abort_count);
+            // RLog::aggregate_qps("commit_count", commit_count);
+            // RLog::aggregate_qps("abort_count", abort_count);
             abort_count = 0;
             commit_count = 0;
             timer.reset();
