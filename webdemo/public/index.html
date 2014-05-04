@@ -1,1 +1,103 @@
-TODO: index.html
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="./smoothie.js"></script>
+        <script type="text/javascript">
+
+        // Thanks to http://jsbeautifier.org/
+
+        var series_ratio = new TimeSeries();
+        var series_commit = new TimeSeries();
+        var series_attempt = new TimeSeries();
+
+        var update_interval = 1250;
+        setInterval(function() {
+            // TODO download by ajax
+            var time_now = new Date().getTime();
+            var commit_count = Math.random() * 1000;
+            var abort_count = Math.random() * 200;
+
+            var commit_ratio = 0.0;
+            if (commit_count + abort_count > 0) {
+                commit_ratio = commit_count / (commit_count + abort_count);
+            }
+
+            series_ratio.append(time_now, commit_ratio);
+            series_commit.append(time_now, commit_count);
+            series_attempt.append(time_now, commit_count + abort_count);
+        }, update_interval);
+
+        function myYRangeFunction(range) {
+            var min = range.min;
+            var max = (Math.ceil(range.max / 100.0) + 1) * 100;
+            return {min: min, max: max};
+        }
+
+        function create_chart() {
+            var ratio_chart = new SmoothieChart({
+                millisPerPixel: 100,
+                grid: {
+                    fillStyle: '#ffffff',
+                    strokeStyle: 'rgba(119,119,119,0.4)',
+                    sharpLines: true,
+                    millisPerLine: 6000,
+                    verticalSections: 5
+                },
+                labels: {
+                    fillStyle: '#000000',
+                    precision: 0
+                },
+                maxValue: 1,
+                minValue: 0,
+                timestampFormatter: SmoothieChart.timeFormatter
+            });
+            ratio_chart.addTimeSeries(series_ratio, {
+                strokeStyle: 'rgba(0, 0, 255, 1)',
+                fillStyle: 'rgba(0, 0, 255, 0.2)',
+                lineWidth: 1
+            });
+            var delay = 1000;
+            ratio_chart.streamTo(document.getElementById("chart-ratio"), delay);
+
+
+            var tps_chart = new SmoothieChart({
+                millisPerPixel: 100,
+                grid: {
+                    fillStyle: '#ffffff',
+                    strokeStyle: 'rgba(119,119,119,0.4)',
+                    sharpLines: true,
+                    millisPerLine: 6000,
+                    verticalSections: 5
+                },
+                labels: {
+                    fillStyle: '#000000',
+                    precision: 0
+                },
+                minValue: 0,
+                timestampFormatter: SmoothieChart.timeFormatter,
+                yRangeFunction: myYRangeFunction
+            });
+            tps_chart.addTimeSeries(series_attempt, {
+                strokeStyle: 'rgba(255, 0, 0, 1)',
+                fillStyle: 'rgba(255, 220, 220, 1)',
+                lineWidth: 1
+            });
+            tps_chart.addTimeSeries(series_commit, {
+                strokeStyle: 'rgba(0, 255, 0, 1)',
+                fillStyle: 'rgba(220, 255, 220, 1)',
+                lineWidth: 1
+            });
+            var delay = 1000;
+            tps_chart.streamTo(document.getElementById("chart-tps"), delay);
+        }
+        </script>
+    </head>
+    <body onload="create_chart()">
+        Transactions per second (stacked <span style='color: #00ff00'>COMMIT</span> &amp; <span style='color: #ff0000'>ABORT</span>):<p/>
+        <canvas id="chart-tps" width="600" height="200"></canvas>
+        <p/>
+        Commit ratio:<p/>
+        <canvas id="chart-ratio" width="600" height="200"></canvas>
+
+    </body>
+</html>
