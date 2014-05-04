@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <signal.h>
 
 #include "base/all.h"
@@ -80,10 +81,46 @@ static void do_one_transaction() {
     i64 txn_id = (i64(rnd.next()) << 32) | rnd.next();
     Log::debug("txn_id = %lld", txn_id);
 
+    vector<int> used_server_id;
     for (int i = 0; i < conf_records_per_transaction; i++) {
         int record_id = rnd.next(0, conf_active_servers * conf_records_per_server);
         int server_id = record_id / conf_records_per_server;
         Log::debug("server_id = %d, record_id = %d", server_id, record_id);
+
+        TRLProxy proxy(client_pool->get_client(servers[server_id]));
+
+        if (std::find(used_server_id.begin(), used_server_id.end(), server_id) == used_server_id.end()) {
+            proxy.begin_transaction(txn_id);
+            used_server_id.push_back(server_id);
+        }
+
+        if (i == 0) {
+            proxy.update_account(txn_id, record_id, conf_records_per_transaction - 1);
+        } else {
+            proxy.update_account(txn_id, record_id, -1);
+        }
+    }
+
+    bool should_abort = false;
+    for (int i = 0; !should_abort && i < (int) used_server_id.size(); i++) {
+        int server_id = used_server_id[i];
+        TRLProxy proxy(client_pool->get_client(servers[server_id]));
+        i8 ok;
+        proxy.commit_prepare(txn_id, &ok);
+        Log::debug("ok = %d", ok);
+        if (ok != 0) {
+            should_abort = true;
+        }
+        verify(ok == 0);
+    }
+
+    for (auto& server_id : used_server_id) {
+        TRLProxy proxy(client_pool->get_client(servers[server_id]));
+        if (should_abort) {
+            proxy.abort_transaction(txn_id);
+        } else {
+            proxy.commit_confirm(txn_id);
+        }
     }
 }
 
