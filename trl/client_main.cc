@@ -69,6 +69,8 @@ static void load_config() {
 
 ClientPool* client_pool;
 Rand rnd;
+int commit_count;
+int abort_count;
 
 static void do_one_transaction() {
     auto servers = server_list();
@@ -79,13 +81,13 @@ static void do_one_transaction() {
     verify(conf_records_per_transaction > 0);
 
     i64 txn_id = (i64(rnd.next()) << 32) | rnd.next();
-    Log::debug("txn_id = %lld", txn_id);
+//    Log::debug("txn_id = %lld", txn_id);
 
     vector<int> used_server_id;
     for (int i = 0; i < conf_records_per_transaction; i++) {
         int record_id = rnd.next(0, conf_active_servers * conf_records_per_server);
         int server_id = record_id / conf_records_per_server;
-        Log::debug("server_id = %d, record_id = %d", server_id, record_id);
+//        Log::debug("server_id = %d, record_id = %d", server_id, record_id);
 
         TRLProxy proxy(client_pool->get_client(servers[server_id]));
 
@@ -107,19 +109,20 @@ static void do_one_transaction() {
         TRLProxy proxy(client_pool->get_client(servers[server_id]));
         i8 ok;
         proxy.commit_prepare(txn_id, &ok);
-        Log::debug("ok = %d", ok);
+//        Log::debug("ok = %d", ok);
         if (ok != 0) {
             should_abort = true;
         }
-        verify(ok == 0);
     }
 
     for (auto& server_id : used_server_id) {
         TRLProxy proxy(client_pool->get_client(servers[server_id]));
         if (should_abort) {
             proxy.abort_transaction(txn_id);
+            abort_count++;
         } else {
             proxy.commit_confirm(txn_id);
+            commit_count++;
         }
     }
 }
@@ -139,7 +142,10 @@ int main() {
 
         if (timer.elapsed() > interval) {
             load_config();
-            RLog::info("TODO: report statistics");
+            RLog::info("abort_count = %d", abort_count);
+            RLog::info("commit_count = %d", commit_count);
+            abort_count = 0;
+            commit_count = 0;
             timer.reset();
             timer.start();
         }

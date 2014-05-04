@@ -41,14 +41,14 @@ public:
     }
 
     virtual void begin_transaction(const rpc::i64& txn_id) {
-        Log::debug("begin txn_id=%ld", txn_id);
+//        Log::debug("begin txn_id=%ld", txn_id);
         verify(all_txn_.find(txn_id) == all_txn_.end());
         Txn* txn = txn_mgr_.start(txn_id);
         insert_into_map(all_txn_, txn_id, txn);
     }
 
     virtual void update_account(const rpc::i64& txn_id, const rpc::i32& account_id, const rpc::i32& amount) {
-        Log::debug("update txn_id=%ld, account_id=%d, amount=%d", txn_id, account_id, amount);
+//        Log::debug("update txn_id=%ld, account_id=%d, amount=%d", txn_id, account_id, amount);
         auto it = all_txn_.find(txn_id);
         verify(it != all_txn_.end());
         Txn* txn = it->second;
@@ -73,7 +73,7 @@ public:
             delete txn;
             *ok = -1;
         }
-        Log::debug("prepare txn_id=%ld, outcome=%d", txn_id, *ok);
+//        Log::debug("prepare txn_id=%ld, outcome=%d", txn_id, *ok);
     }
 
     virtual void commit_confirm(const rpc::i64& txn_id) {
@@ -83,17 +83,18 @@ public:
         txn->commit_confirm();
         all_txn_.erase(it);
         delete txn;
-        Log::debug("commit txn_id=%ld", txn_id);
+//        Log::debug("commit txn_id=%ld", txn_id);
     }
 
     virtual void abort_transaction(const rpc::i64& txn_id) {
-        Log::debug("abort txn_id=%ld", txn_id);
+        // Log::debug("abort txn_id=%ld", txn_id);
         auto it = all_txn_.find(txn_id);
-        verify(it != all_txn_.end());
-        Txn* txn = it->second;
-        txn->abort();
-        all_txn_.erase(it);
-        delete txn;
+        if (it != all_txn_.end()) {
+            Txn* txn = it->second;
+            txn->abort();
+            all_txn_.erase(it);
+            delete txn;
+        }
     }
 };
 

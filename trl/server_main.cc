@@ -41,7 +41,9 @@ int main(int argc, char* argv[]) {
     string bind_addr = server_list()[server_id];
 
     TRLService* svc = create_trl_service();
-    Server *server = new Server;
+    PollMgr* poll = new PollMgr(1);
+    ThreadPool* thrpool = new ThreadPool(1);
+    Server *server = new Server(poll, thrpool);
     server->reg(svc);
 
     int ret_code = 0;
@@ -55,6 +57,8 @@ int main(int argc, char* argv[]) {
     }
     delete server;
     delete svc;
+    poll->release();
+    thrpool->release();
 
     return 0;
 }
