@@ -111,6 +111,13 @@
 
         function init_demo() {
             $.get("config", function(config) {
+
+                $("input[name=trl_policy]:radio").each(function(idx, item) {
+                    if (item.value == config.trl_policy) {
+                        $("#" + item.id).attr("checked", "checked");
+                    }
+                });
+
                 // init sliders
                 $("#slider-active-servers").noUiSlider({
                     start: [config.active_servers],
@@ -181,20 +188,24 @@
                 });
             });
 
-            $("#slider-active-servers").change(function(){
+            $("#slider-active-servers").change(function() {
                 update_config("active_servers", $("#slider-active-servers").val());
             });
 
-            $("#slider-active-clients").change(function(){
+            $("#slider-active-clients").change(function() {
                 update_config("active_clients", $("#slider-active-clients").val());
             });
 
-            $("#slider-svr-records").change(function(){
+            $("#slider-svr-records").change(function() {
                 update_config("records_per_server", $("#slider-svr-records").val());
             });
 
-            $("#slider-tx-records").change(function(){
+            $("#slider-tx-records").change(function() {
                 update_config("records_per_transaction", $("#slider-tx-records").val());
+            });
+
+            $("input[name=trl_policy]:radio").change(function(ev) {
+                update_config("trl_policy", ev.target.value);
             });
 
             create_chart();
@@ -221,6 +232,12 @@
 
             <span id="value-tx-records"></span> records per transaction
             <div id="slider-tx-records" style="width: 300px"></div>
+
+            <p style="height: 20px"></p>
+
+            Rate limit policy:<p/>
+            <input id="chk_trl_none" type="radio" name="trl_policy" value="none">None<p/>
+            <input id="chk_trl_basic" type="radio" name="trl_policy" value="basic">Basic<p/>
         </div>
 
         Transactions per second (stacked <span style='color: #ff0000'>ABORT</span> + <span style='color: #00ff00'>COMMIT</span>):

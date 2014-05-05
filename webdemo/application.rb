@@ -53,7 +53,12 @@ get '/config' do
       end
       sp = line.split(":")
       key = sp[0].strip
-      value = sp[1].strip.to_i
+      v = sp[1].strip
+      if v == v.to_i.to_s
+        value = sp[1].strip.to_i
+      else
+        value = v
+      end
       conf[key] = value
     end
   end
