@@ -19,7 +19,7 @@ commit_count = 0
 abort_count = 0
 get '/stat' do
   content_type :json
-  commit_count = (abort_count + 1) % 17
+  commit_count = (commit_count + 1) % 17
   abort_count = (abort_count + 1) % 16
   { :commit_count => commit_count, :abort_count => abort_count }.to_json
 end

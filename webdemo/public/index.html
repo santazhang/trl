@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script type="text/javascript" src="./jquery-2.1.1.min.js"></script>
         <script type="text/javascript" src="./smoothie.js"></script>
         <script type="text/javascript">
 
@@ -10,30 +11,29 @@
         var series_abort = new TimeSeries();
         var series_total = new TimeSeries();
 
-        var update_interval = 1250;
-        setInterval(function() {
-            // TODO download by ajax
-            var time_now = new Date().getTime();
-            var commit_count = Math.random() * 1000;
-            var abort_count = Math.random() * 1000;
+        function poll_chart_data() {
+            $.get("stat", function(data) {
+                var time_now = new Date().getTime();
+                var commit_count = data.commit_count;
+                var abort_count = data.abort_count;
 
-            var commit_ratio = 0.0;
-            if (commit_count + abort_count > 0) {
-                commit_ratio = commit_count / (commit_count + abort_count);
-            }
+                var commit_ratio = 0.0;
+                if (commit_count + abort_count > 0) {
+                    commit_ratio = commit_count / (commit_count + abort_count);
+                }
 
-            series_ratio.append(time_now, commit_ratio);
-            series_abort.append(time_now, abort_count);
-            series_total.append(time_now, commit_count + abort_count);
-        }, update_interval);
-
-        function myYRangeFunction(range) {
-            var min = range.min;
-            var max = (Math.ceil(range.max / 100.0) + 1) * 100;
-            return {min: min, max: max};
+                series_ratio.append(time_now, commit_ratio);
+                series_abort.append(time_now, abort_count);
+                series_total.append(time_now, commit_count + abort_count);
+            });
         }
 
+        var poll_interval = 1000;
+        setInterval(poll_chart_data, poll_interval);
+
         function create_chart() {
+            var delay = 1000;
+
             var ratio_chart = new SmoothieChart({
                 millisPerPixel: 100,
                 grid: {
@@ -56,9 +56,7 @@
                 fillStyle: 'rgba(0, 0, 255, 0.4)',
                 lineWidth: 1
             });
-            var delay = 1000;
             ratio_chart.streamTo(document.getElementById("chart-ratio"), delay);
-
 
             var tps_chart = new SmoothieChart({
                 millisPerPixel: 100,
@@ -75,7 +73,11 @@
                 },
                 minValue: 0,
                 timestampFormatter: SmoothieChart.timeFormatter,
-                yRangeFunction: myYRangeFunction
+                yRangeFunction: function(range) {
+                    var min = range.min;
+                    var max = (Math.ceil(range.max / 100.0) + 1) * 100;
+                    return {min: min, max: max};
+                }
             });
             tps_chart.addTimeSeries(series_total, {
                 strokeStyle: 'rgba(0, 255, 0, 1)',
@@ -87,7 +89,6 @@
                 fillStyle: 'rgba(255, 0, 0, 0.4)',
                 lineWidth: 1
             });
-            var delay = 1000;
             tps_chart.streamTo(document.getElementById("chart-tps"), delay);
         }
         </script>
