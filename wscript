@@ -38,7 +38,7 @@ def build(bld):
     _depend("trl/services.h", "trl/services.rpc", "../simple-rpc/bin/rpcgen trl/services.rpc")
 
     bld.stlib(
-        source=bld.path.ant_glob(["trl/*.cc", "trl/*.cpp", "trl/*.c"], excl="trl/server_main.cc"),
+        source=bld.path.ant_glob(["trl/*.cc", "trl/*.cpp", "trl/*.c"], excl="trl/*_main.cc"),
         target="trl",
         use=bld.env.USES)
 
@@ -48,10 +48,6 @@ def build(bld):
     _prog("trl/server_main.cc", "trl_server")
     _prog("trl/client_main.cc", "trl_client")
     _prog(bld.path.ant_glob("test/test*.cc"), "unittest")
-    
-    bld.program(source=bld.path.ant_glob("fake_rlog/*.cc"),
-                target="fake_rlogserver",
-                includes=". fake_rlog", use="RPC BASE PTHREAD")
 
 #
 # waf helper code
