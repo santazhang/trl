@@ -7,15 +7,15 @@
         // Thanks to http://jsbeautifier.org/
 
         var series_ratio = new TimeSeries();
-        var series_commit = new TimeSeries();
-        var series_attempt = new TimeSeries();
+        var series_abort = new TimeSeries();
+        var series_total = new TimeSeries();
 
         var update_interval = 1250;
         setInterval(function() {
             // TODO download by ajax
             var time_now = new Date().getTime();
             var commit_count = Math.random() * 1000;
-            var abort_count = Math.random() * 200;
+            var abort_count = Math.random() * 1000;
 
             var commit_ratio = 0.0;
             if (commit_count + abort_count > 0) {
@@ -23,8 +23,8 @@
             }
 
             series_ratio.append(time_now, commit_ratio);
-            series_commit.append(time_now, commit_count);
-            series_attempt.append(time_now, commit_count + abort_count);
+            series_abort.append(time_now, abort_count);
+            series_total.append(time_now, commit_count + abort_count);
         }, update_interval);
 
         function myYRangeFunction(range) {
@@ -53,7 +53,7 @@
             });
             ratio_chart.addTimeSeries(series_ratio, {
                 strokeStyle: 'rgba(0, 0, 255, 1)',
-                fillStyle: 'rgba(0, 0, 255, 0.2)',
+                fillStyle: 'rgba(0, 0, 255, 0.4)',
                 lineWidth: 1
             });
             var delay = 1000;
@@ -77,14 +77,14 @@
                 timestampFormatter: SmoothieChart.timeFormatter,
                 yRangeFunction: myYRangeFunction
             });
-            tps_chart.addTimeSeries(series_attempt, {
-                strokeStyle: 'rgba(255, 0, 0, 1)',
-                fillStyle: 'rgba(255, 220, 220, 1)',
+            tps_chart.addTimeSeries(series_total, {
+                strokeStyle: 'rgba(0, 255, 0, 1)',
+                fillStyle: 'rgba(0, 255, 0, 0.2)',
                 lineWidth: 1
             });
-            tps_chart.addTimeSeries(series_commit, {
-                strokeStyle: 'rgba(0, 255, 0, 1)',
-                fillStyle: 'rgba(220, 255, 220, 1)',
+            tps_chart.addTimeSeries(series_abort, {
+                strokeStyle: 'rgba(255, 0, 0, 1)',
+                fillStyle: 'rgba(255, 0, 0, 0.4)',
                 lineWidth: 1
             });
             var delay = 1000;
@@ -93,7 +93,7 @@
         </script>
     </head>
     <body onload="create_chart()">
-        Transactions per second (stacked <span style='color: #00ff00'>COMMIT</span> &amp; <span style='color: #ff0000'>ABORT</span>):<p/>
+        Transactions per second (stacked <span style='color: #ff0000'>ABORT</span> + <span style='color: #00ff00'>COMMIT</span>):<p/>
         <canvas id="chart-tps" width="600" height="200"></canvas>
         <p/>
         Commit ratio:<p/>
