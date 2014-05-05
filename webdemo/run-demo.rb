@@ -2,12 +2,12 @@
 
 require "#{File.dirname __FILE__}/lib/helper"
 
-servers = File.read("#{File.dirname __FILE__}/../conf/servers.txt").each_line.select {|l| l.strip != "" and not l.start_with? "#"}
+servers = File.read("#{File.dirname __FILE__}/conf/servers.txt").each_line.select {|l| l.strip != "" and not l.start_with? "#"}
 
 begin
   servers.each_with_index do |addr, i|
     host, port = addr.split ":"
-    remote_run host, "cd #{File.dirname __FILE__}/.. ; ./build/trl_server #{i} &"
+    remote_run host, "cd #{File.dirname __FILE__}/.. ; ./bin/trl_server #{i} &"
   end
   system "cd '#{File.dirname __FILE__}' ;ruby application.rb"
 ensure

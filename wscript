@@ -48,6 +48,10 @@ def build(bld):
     _prog("trl/server_main.cc", "trl_server")
     _prog("trl/client_main.cc", "trl_client")
     _prog(bld.path.ant_glob("test/test*.cc"), "unittest")
+    
+    bld.program(source=bld.path.ant_glob("fake_rlog/*.cc"),
+                target="fake_rlogserver",
+                includes=". fake_rlog", use="RPC BASE PTHREAD")
 
 #
 # waf helper code
