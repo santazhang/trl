@@ -1,3 +1,4 @@
+#include <string>
 #include <algorithm>
 #include <signal.h>
 
@@ -41,6 +42,7 @@ static int conf_active_servers = -1;
 static int conf_active_clients = -1;
 static int conf_records_per_server = -1;
 static int conf_records_per_transaction = -1;
+static string conf_trl_policy;
 
 static void load_config() {
     INIReader ini("conf/config.ini");
@@ -71,6 +73,12 @@ static void load_config() {
         Log::info("set records_per_transaction = %d", conf_records_per_transaction);
     }
 
+    string old_str = conf_trl_policy;
+    conf_trl_policy = ini.Get("", "trl_policy", "none");
+    if (conf_trl_policy != old_str) {
+        Log::info("set conf_trl_policy = %s", conf_trl_policy.c_str());
+    }
+
     verify(conf_active_servers * conf_records_per_server <= max_record_id);
 }
 
@@ -78,6 +86,21 @@ ClientPool* client_pool;
 Rand rnd;
 int commit_count;
 int abort_count;
+double trl_wait_sec;
+
+static void trl_update(bool last_is_commit) {
+    if (conf_trl_policy == "none") {
+        trl_wait_sec = 0.0;
+        return;
+    } else if (conf_trl_policy == "basic") {
+        if (last_is_commit == true) {
+            trl_wait_sec -= 0.001;
+        } else {
+            trl_wait_sec += 0.001;
+        }
+        trl_wait_sec = base::clamp(trl_wait_sec, 0.0, 0.1);
+    }
+}
 
 static void do_one_transaction() {
     auto servers = server_list();
@@ -132,6 +155,8 @@ static void do_one_transaction() {
             commit_count++;
         }
     }
+
+    trl_update(!should_abort);
 }
 
 int main(int argc, char* argv[]) {
@@ -154,12 +179,18 @@ int main(int argc, char* argv[]) {
     while (!g_stop_flag) {
         if (client_id <= conf_active_clients) {
             do_one_transaction();
+            if (conf_trl_policy != "none") {
+                usleep(trl_wait_sec * 1000 * 1000);
+            }
         } else {
             usleep(100 * 1000);
         }
 
         if (timer.elapsed() > interval) {
             load_config();
+            if (conf_trl_policy == "none") {
+                trl_wait_sec = 0.0;
+            }
             // RLog::info("commit_count = %d, abort_count = %d", commit_count, abort_count);
             RLog::aggregate_qps("commit_count", commit_count);
             RLog::aggregate_qps("abort_count", abort_count);
