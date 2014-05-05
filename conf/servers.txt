@@ -1,7 +1,7 @@
-127.0.0.1:20001
-127.0.0.1:20002
-127.0.0.1:20003
-127.0.0.1:20004
-127.0.0.1:20005
+beaker-20.news.cs.nyu.edu:7891
+beaker-21.news.cs.nyu.edu:7891
+beaker-22.news.cs.nyu.edu:7891
+beaker-23.news.cs.nyu.edu:7891
+beaker-24.news.cs.nyu.edu:7891
 
 # list of servers, in 'host:port' format
