@@ -19,10 +19,10 @@ static bool g_stop_flag = false;
 
 static void signal_handler(int sig) {
     if (g_stop_flag == false) {
-        Log::info("caught signal %d, stopping server now", sig);
+        Log::info("caught signal %d, stopping client now", sig);
         g_stop_flag = true;
     } else {
-        Log::info("caught signal %d for the second time, kill server now", sig);
+        Log::info("caught signal %d for the second time, kill client now", sig);
         exit(-sig);
     }
 }
@@ -190,6 +190,8 @@ int main(int argc, char* argv[]) {
             load_config();
             if (conf_trl_policy == "none") {
                 trl_wait_sec = 0.0;
+            } else {
+                Log::info("TRL policy=%s, wait=%lf", conf_trl_policy.c_str(), trl_wait_sec);
             }
             // RLog::info("commit_count = %d, abort_count = %d", commit_count, abort_count);
             RLog::aggregate_qps("commit_count", commit_count);

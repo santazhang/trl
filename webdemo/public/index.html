@@ -16,6 +16,7 @@
 
         var series_ratio = new TimeSeries();
         var series_abort = new TimeSeries();
+        var series_commit = new TimeSeries();
         var series_total = new TimeSeries();
 
         function poll_chart_data() {
@@ -36,6 +37,7 @@
 
                 series_ratio.append(time_now, commit_ratio);
                 series_abort.append(time_now, abort_count);
+                series_commit.append(time_now, commit_count);
                 series_total.append(time_now, commit_count + abort_count);
             });
         }
@@ -45,6 +47,34 @@
 
         function create_chart() {
             var delay = 1000;
+
+            var commit_chart = new SmoothieChart({
+                millisPerPixel: 100,
+                grid: {
+                    fillStyle: '#ffffff',
+                    strokeStyle: 'rgba(119,119,119,0.4)',
+                    sharpLines: true,
+                    millisPerLine: 6000,
+                    verticalSections: 5
+                },
+                labels: {
+                    fillStyle: '#000000',
+                    precision: 0
+                },
+                minValue: 0,
+                timestampFormatter: SmoothieChart.timeFormatter,
+                yRangeFunction: function(range) {
+                    var min = range.min;
+                    var max = (Math.ceil(range.max / 100.0) + 1) * 100;
+                    return {min: min, max: max};
+                }
+            });
+            commit_chart.addTimeSeries(series_commit, {
+                strokeStyle: 'rgba(0, 255, 0, 1)',
+                fillStyle: 'rgba(0, 255, 0, 0.4)',
+                lineWidth: 1
+            });
+            commit_chart.streamTo(document.getElementById("chart-commit"), delay);
 
             var ratio_chart = new SmoothieChart({
                 millisPerPixel: 100,
@@ -243,6 +273,9 @@
         Transactions per second (stacked <span style='color: #ff0000'>ABORT</span> + <span style='color: #00ff00'>COMMIT</span>):
         <span id="value-abort-count" style='color: #ff0000'>0</span> + <span id="value-commit-count" style='color: #00ff00'>0</span><p/>
         <canvas id="chart-tps" width="600" height="200"></canvas>
+        <p/>
+        Commit throughput:<p/>
+        <canvas id="chart-commit" width="600" height="200"></canvas>
         <p/>
         Commit ratio: <span id="value-commit-ratio" style='color: #0000ff'><p/>
         <canvas id="chart-ratio" width="600" height="200"></canvas>
