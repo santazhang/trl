@@ -99,65 +99,97 @@
             tps_chart.streamTo(document.getElementById("chart-tps"), delay);
         }
 
+        function update_config(name, value) {
+            console.log({name: name, value: value});
+            $.get("update", {name: name, value: value});
+        }
+
         function init_demo() {
-            // init sliders
-            $("#slider-active-servers").noUiSlider({
-                start: [1],
-                step: 1,
-                range: {
-                    min: [1],
-                    max: [5]
-                },
-                serialization: {
-                    lower: [
-                        $.Link({
-                            target: $("#value-active-servers")
-                        })
-                    ],
-                    format: {decimals: 0}
-                }
+            $.get("config", function(config) {
+                // init sliders
+                $("#slider-active-servers").noUiSlider({
+                    start: [config.active_servers],
+                    step: 1,
+                    range: {
+                        min: [1],
+                        max: [5]
+                    },
+                    serialization: {
+                        lower: [
+                            $.Link({
+                                target: $("#value-active-servers")
+                            })
+                        ],
+                        format: {decimals: 0}
+                    }
+                });
+
+                $("#slider-active-clients").noUiSlider({
+                    start: [config.active_clients],
+                    step: 1,
+                    range: {
+                        min: [0],
+                        max: [50]
+                    },
+                    serialization: {
+                        lower: [
+                            $.Link({
+                                target: $("#value-active-clients")
+                            })
+                        ],
+                        format: {decimals: 0}
+                    }
+                });
+
+                $("#slider-svr-records").noUiSlider({
+                    start: [config.records_per_server],
+                    step: 1,
+                    range: {
+                        min: [1],
+                        max: [100]
+                    },
+                    serialization: {
+                        lower: [
+                            $.Link({
+                                target: $("#value-svr-records")
+                            })
+                        ],
+                        format: {decimals: 0}
+                    }
+                });
+
+                $("#slider-tx-records").noUiSlider({
+                    start: [config.records_per_transaction],
+                    step: 1,
+                    range: {
+                        min: [2],
+                        max: [10]
+                    },
+                    serialization: {
+                        lower: [
+                            $.Link({
+                                target: $("#value-tx-records")
+                            })
+                        ],
+                        format: {decimals: 0}
+                    }
+                });
             });
 
-            $("#slider-active-clients").noUiSlider({
-                start: [0],
-                step: 1,
-                range: {
-                    min: [0],
-                    max: [50]
-                },
-                serialization: {
-                    lower: [
-                        $.Link({
-                            target: $("#value-active-clients")
-                        })
-                    ],
-                    format: {decimals: 0}
-                }
-            });
-
-            $("#slider-tx-records").noUiSlider({
-                start: [2],
-                step: 1,
-                range: {
-                    min: [2],
-                    max: [10]
-                },
-                serialization: {
-                    lower: [
-                        $.Link({
-                            target: $("#value-tx-records")
-                        })
-                    ],
-                    format: {decimals: 0}
-                }
+            $("#slider-active-servers").change(function(){
+                update_config("active_servers", $("#slider-active-servers").val());
             });
 
             $("#slider-active-clients").change(function(){
-                console.log($("#img-active-clients"));
-                $("#img-active-clients").show();
-                setTimeout(function() {
-                    $("#img-active-clients").hide();
-                }, 1000);
+                update_config("active_clients", $("#slider-active-clients").val());
+            });
+
+            $("#slider-svr-records").change(function(){
+                update_config("records_per_server", $("#slider-svr-records").val());
+            });
+
+            $("#slider-tx-records").change(function(){
+                update_config("records_per_transaction", $("#slider-tx-records").val());
             });
 
             create_chart();
@@ -175,8 +207,11 @@
             <p/>
 
             <span id="value-active-clients"></span> active clients
-            <img id="img-active-clients" src="./loading.gif" style="display: none" width=12 height=12></img>
             <div id="slider-active-clients" style="width: 300px"></div>
+            <p/>
+
+            <span id="value-svr-records"></span> records per server
+            <div id="slider-svr-records" style="width: 300px"></div>
             <p/>
 
             <span id="value-tx-records"></span> records per transaction
