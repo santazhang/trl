@@ -2,7 +2,14 @@
 <html>
     <head>
         <script type="text/javascript" src="./jquery-2.1.1.min.js"></script>
-        <script type="text/javascript" src="./smoothie.js"></script>
+        <link href="./jquery.nouislider-6.1.0.css" rel="stylesheet">
+        <script src="./jquery.nouislider-6.1.0.min.js"></script>
+        <script type="text/javascript" src="./smoothie-1.23.js"></script>
+        <style>
+            body {
+                font-family: "Verdana";
+            }
+        </style>
         <script type="text/javascript">
 
         // Thanks to http://jsbeautifier.org/
@@ -91,9 +98,91 @@
             });
             tps_chart.streamTo(document.getElementById("chart-tps"), delay);
         }
+
+        function init_demo() {
+            // init sliders
+            $("#slider-active-servers").noUiSlider({
+                start: [1],
+                step: 1,
+                range: {
+                    min: [1],
+                    max: [5]
+                },
+                serialization: {
+                    lower: [
+                        $.Link({
+                            target: $("#value-active-servers")
+                        })
+                    ],
+                    format: {decimals: 0}
+                }
+            });
+
+            $("#slider-active-clients").noUiSlider({
+                start: [0],
+                step: 1,
+                range: {
+                    min: [0],
+                    max: [50]
+                },
+                serialization: {
+                    lower: [
+                        $.Link({
+                            target: $("#value-active-clients")
+                        })
+                    ],
+                    format: {decimals: 0}
+                }
+            });
+
+            $("#slider-tx-records").noUiSlider({
+                start: [2],
+                step: 1,
+                range: {
+                    min: [2],
+                    max: [10]
+                },
+                serialization: {
+                    lower: [
+                        $.Link({
+                            target: $("#value-tx-records")
+                        })
+                    ],
+                    format: {decimals: 0}
+                }
+            });
+
+            $("#slider-active-clients").change(function(){
+                console.log($("#img-active-clients"));
+                $("#img-active-clients").show();
+                setTimeout(function() {
+                    $("#img-active-clients").hide();
+                }, 1000);
+            });
+
+            create_chart();
+        }
         </script>
     </head>
-    <body onload="create_chart()">
+    <body onload="init_demo()">
+
+        <div style="position: absolute; left: 650px; top: 8px">
+            Configuration:
+            <p/>
+
+            <span id="value-active-servers"></span> active servers
+            <div id="slider-active-servers" style="width: 300px"></div>
+            <p/>
+
+            <span id="value-active-clients"></span> active clients
+            <img id="img-active-clients" src="./loading.gif" style="display: none" width=12 height=12></img>
+            <div id="slider-active-clients" style="width: 300px"></div>
+            <p/>
+
+            <span id="value-tx-records"></span> records per transaction
+            <div id="slider-tx-records" style="width: 300px"></div>
+        </div>
+
         Transactions per second (stacked <span style='color: #ff0000'>ABORT</span> + <span style='color: #00ff00'>COMMIT</span>):<p/>
         <canvas id="chart-tps" width="600" height="200"></canvas>
         <p/>
