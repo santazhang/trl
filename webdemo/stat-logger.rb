@@ -15,3 +15,7 @@ IO.popen("QPS_INTERVAL=0.1 ../bin/rlogserver").each_line do |line|
     File.rename("log/abort.count~", "log/abort.count")
   end
 end
+
+puts "there might be another rlogserver running"
+
+exit 1

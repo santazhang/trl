@@ -38,6 +38,7 @@ static void install_signal_handler() {
 }
 
 static int conf_active_servers = -1;
+static int conf_active_clients = -1;
 static int conf_records_per_server = -1;
 static int conf_records_per_transaction = -1;
 
@@ -52,6 +53,12 @@ static void load_config() {
         Log::info("set active_servers = %d", conf_active_servers);
     }
 
+    old = conf_active_clients;
+    conf_active_clients = ini.GetInteger("", "active_clients", -1);
+    if (conf_active_clients != old) {
+        Log::info("set active_clients = %d", conf_active_clients);
+    }
+
     old = conf_records_per_server;
     conf_records_per_server = ini.GetInteger("", "records_per_server", -1);
     if (conf_records_per_server != old) {
@@ -63,7 +70,7 @@ static void load_config() {
     if (conf_records_per_transaction != old) {
         Log::info("set records_per_transaction = %d", conf_records_per_transaction);
     }
-    
+
     verify(conf_active_servers * conf_records_per_server <= max_record_id);
 }
 
@@ -127,7 +134,14 @@ static void do_one_transaction() {
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("usage: %s <client-id>\n", argv[0]);
+        exit(1);
+    }
+
+    int client_id = atoi(argv[1]);
+
     RLog::init();
     install_signal_handler();
     load_config();
@@ -138,7 +152,11 @@ int main() {
     Timer timer;
     timer.start();
     while (!g_stop_flag) {
-        do_one_transaction();
+        if (client_id <= conf_active_clients) {
+            do_one_transaction();
+        } else {
+            usleep(100 * 1000);
+        }
 
         if (timer.elapsed() > interval) {
             load_config();

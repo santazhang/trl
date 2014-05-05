@@ -24,10 +24,15 @@
                 var commit_count = data.commit_count;
                 var abort_count = data.abort_count;
 
+                $("#value-commit-count").html(commit_count);
+                $("#value-abort-count").html(abort_count);
+
                 var commit_ratio = 0.0;
                 if (commit_count + abort_count > 0) {
                     commit_ratio = commit_count / (commit_count + abort_count);
                 }
+
+                $("#value-commit-ratio").html(Math.round(commit_ratio * 100.0) + "%");
 
                 series_ratio.append(time_now, commit_ratio);
                 series_abort.append(time_now, abort_count);
@@ -218,10 +223,11 @@
             <div id="slider-tx-records" style="width: 300px"></div>
         </div>
 
-        Transactions per second (stacked <span style='color: #ff0000'>ABORT</span> + <span style='color: #00ff00'>COMMIT</span>):<p/>
+        Transactions per second (stacked <span style='color: #ff0000'>ABORT</span> + <span style='color: #00ff00'>COMMIT</span>):
+        <span id="value-abort-count" style='color: #ff0000'></span> + <span id="value-commit-count" style='color: #00ff00'></span><p/>
         <canvas id="chart-tps" width="600" height="200"></canvas>
         <p/>
-        Commit ratio:<p/>
+        Commit ratio: <span id="value-commit-ratio" style='color: #0000ff'><p/>
         <canvas id="chart-ratio" width="600" height="200"></canvas>
 
     </body>
