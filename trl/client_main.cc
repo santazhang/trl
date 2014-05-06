@@ -46,9 +46,11 @@ static string conf_trl_policy;
 
 static void load_config() {
     INIReader ini("conf/config.ini");
-    verify(ini.ParseError() == 0);
-    int old;
+    if (ini.ParseError() != 0) {
+        return;
+    }
 
+    int old;
     old = conf_active_servers;
     conf_active_servers = ini.GetInteger("", "active_servers", -1);
     if (conf_active_servers != old) {
