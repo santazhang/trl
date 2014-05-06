@@ -1,0 +1,69 @@
+Transaction rate limit
+Course project for Networks and Mobile Systems, Spring 2014, NYU CS Department
+
+Santa Zhang (santa1987@gmail.com)
+
+How to build
+============
+
+TRL depends on 3 other projects:
+
+  * https://github.com/santazhang/base-utils
+  * https://github.com/santazhang/simple-rpc
+  * https://github.com/santazhang/memdb
+
+Checkout those 2 projects, make sure you have following directory layout:
+
+    $WORKSPACE/base-utils
+    $WORKSPACE/simple-rpc
+    $WORKSPACE/memdb
+    $WORKSPACE/trl
+
+Build and test base-utils, simple-rpc and memdb first:
+
+    cd $WORKSPACE/base-utils
+    ./waf configure
+    ./waf
+    ./build/unittest
+    cd $WORKSPACE/simple-rpc
+    ./waf configure
+    ./waf
+    ./build/unittest
+    cd $WORKSPACE/memdb
+    ./waf configure
+    ./waf
+    ./build/unittest
+
+Now you are ready to build TRL:
+
+    ./waf configure
+    ./waf
+
+
+How to setup
+============
+
+The system should run on an NFS volume, so that all components share storage.
+
+First, properly configure the system:
+
+    * List of server nodes in conf/config.ini
+        + Number of servers should match webdemo/public/index.html (search for "noUiSlider")
+    * Update the server address in webdemo/launch-clients.sh (RLOG_SERVER=...)
+
+Then, start all the components:
+
+    * Login to all the server nodes listed in conf/config.ini, boot the servers
+        + ./bin/trl_server <server-id> (server-id starts from 0)
+    * Start statistics server (on RLOG_SERVER)
+        + On the webdemo server, run ./stat-logger.rb
+    * Login to all client nodes, boot all clients
+        + Example command: ./launch-clients.sh 1 3 50
+            - 1: first client node
+            - 3: a total of 3 client nodes
+            - 50: largest client process id (as in webdemo/public/index.html)
+    * Start webdemo server (on RLOG_SERVER)
+        + ruby ./application.rb -o RLOG_SERVER -p 8080
+
+Now just browse to RLOG_SERVER:8080, you should see the demo running.
+
